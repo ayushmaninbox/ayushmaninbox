@@ -1,11 +1,204 @@
-# 💫 About Me:
-👋 Hi, I'm Ayushman! <br><br>I'm an experienced Full Stack Web Developer with a passion for building efficient and user-friendly applications. My toolkit includes front-end technologies like HTML5, CSS3, and JavaScript, alongside back-end frameworks like Node.js and Python. I love problem-solving and am always ready to adapt to new tech. Whether working independently or leading a team, I focus on creating clean, accessible, and engaging digital experiences. <br><br>💡 **Skills:**  <br>- HTML5, CSS3, JavaScript<br>- Node.js, Python, API Development<br>- Version Control, Database Management<br>- Full-stack Development, OOP<br><br>Let’s connect and create something impactful together!<br>
+<h1 align="center"><samp>Turning Ideas Into Reality</samp> <img src="https://github.com/mupezzuol/mupezzuol/blob/master/assets/earth.gif" width="22px" height="22px"></h1>
 
+<h2 align="center"><samp>Hi 👋 I'm Ayushman Mohapatra</samp></h2>
+<h3 align="center"><samp>A Full Stack Web Developer from India</samp></h3>
 
-## 🌐 Socials:
-[![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?logo=Instagram&logoColor=white)](https://instagram.com/theayushmanguy) [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://linkedin.com/in/ayushman-mohapatra) 
+<img align="center" alt="Coding" width="1000" src="https://raw.githubusercontent.com/sugith10/images/main/gif/mario-working.gif">
 
-# 💻 Tech Stack:
-![C](https://img.shields.io/badge/c-%2300599C.svg?style=for-the-badge&logo=c&logoColor=white) ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white) ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Windows Terminal](https://img.shields.io/badge/Windows%20Terminal-%234D4D4D.svg?style=for-the-badge&logo=windows-terminal&logoColor=white) ![Netlify](https://img.shields.io/badge/netlify-%23000000.svg?style=for-the-badge&logo=netlify&logoColor=#00C7B7) ![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white) ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white) ![GithubPages](https://img.shields.io/badge/github%20pages-121013?style=for-the-badge&logo=github&logoColor=white) ![Bootstrap](https://img.shields.io/badge/bootstrap-%238511FA.svg?style=for-the-badge&logo=bootstrap&logoColor=white) ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white) ![Canva](https://img.shields.io/badge/Canva-%2300C4CC.svg?style=for-the-badge&logo=Canva&logoColor=white) ![Adobe Lightroom](https://img.shields.io/badge/Adobe%20Lightroom-31A8FF.svg?style=for-the-badge&logo=Adobe%20Lightroom&logoColor=white) ![Adobe Photoshop](https://img.shields.io/badge/adobe%20photoshop-%2331A8FF.svg?style=for-the-badge&logo=adobe%20photoshop&logoColor=white) ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white) ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white) ![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white) ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+<div style="margin-bottom: 20px;"></div>
 
-<!-- Proudly created with GPRM ( https://gprm.itsvg.in ) -->
+<samp>- 🌐 Check out my portfolio at https://ayushmanmohapatra.netlify.app/</samp>
+
+<samp>- 📫 Contact me at ayushmanmohapatra895@email.com</samp>
+
+<samp>- 💻 Full Stack Developer passionate about creating efficient and user-friendly applications</samp>
+
+<samp>- ⚡ Fun fact: I love problem-solving and am always ready to adapt to new technologies!</samp>
+
+<h3 align="center"><samp>Connect</samp></h3>
+<div style="display: flex; align-items: flex-start; align: center">
+<table align="center">
+  <tr>
+    <td align="center" width="100">
+      <a href="https://www.linkedin.com/in/ayushman-mohapatra/">
+        <img src="https://skillicons.dev/icons?i=linkedin" alt="icon" width="45" height="45" />
+        <br>LinkedIn
+      </a>
+    </td>
+    <td align="center" width="100">
+      <a href="https://github.com/ayushmaninbox">
+        <img src="https://skillicons.dev/icons?i=github" width="45" height="45" alt="GitHub" />
+        <br>GitHub
+      </a>
+    </td>
+    <td align="center" width="100">
+      <a href="https://www.instagram.com/theayushmanguy/">
+        <img src="https://skillicons.dev/icons?i=instagram" alt="icon" width="45" height="45" />
+        <br>Instagram
+      </a>
+    </td>
+  </tr>
+</table>
+</div>
+
+<h3 align="center"><samp>💻 Languages and Tools</samp></h3>
+<div style="display: flex; align-items: flex-start; align: center">
+<table align="center">
+  <tr>
+    <!-- Programming Languages -->
+    <td align="center" width="100">
+        <a href="https://www.python.org/">
+          <img src="https://skillicons.dev/icons?i=python" width="48" height="48" alt="Python" />
+          <br>Python
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.java.com/">
+          <img src="https://skillicons.dev/icons?i=java" width="48" height="48" alt="Java" />
+          <br>Java
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
+          <img src="https://skillicons.dev/icons?i=js" width="48" height="48" alt="JavaScript" />
+          <br>JavaScript
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://en.cppreference.com/w/">
+          <img src="https://skillicons.dev/icons?i=c" width="48" height="48" alt="C" />
+          <br>C
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://cplusplus.com/">
+          <img src="https://skillicons.dev/icons?i=cpp" width="48" height="48" alt="C++" />
+          <br>C++
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.r-project.org/">
+          <img src="https://skillicons.dev/icons?i=r" width="48" height="48" alt="R" />
+          <br>R
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.gnu.org/software/bash/">
+          <img src="https://skillicons.dev/icons?i=bash" width="48" height="48" alt="Shell Script" />
+          <br>Shell Script
+        </a>
+    </td>
+  </tr>
+  <tr>
+    <!-- Frontend Technologies -->
+    <td align="center" width="100">
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTML">
+          <img src="https://skillicons.dev/icons?i=html" width="48" height="48" alt="HTML5" />
+          <br>HTML5
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://developer.mozilla.org/en-US/docs/Web/CSS">
+          <img src="https://skillicons.dev/icons?i=css" width="48" height="48" alt="CSS3" />
+          <br>CSS3
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://react.dev/">
+          <img src="https://skillicons.dev/icons?i=react" width="48" height="48" alt="React" />
+          <br>React
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://tailwindcss.com/">
+          <img src="https://skillicons.dev/icons?i=tailwind" width="48" height="48" alt="Tailwind CSS" />
+          <br>Tailwind
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://getbootstrap.com/">
+          <img src="https://skillicons.dev/icons?i=bootstrap" width="48" height="48" alt="Bootstrap" />
+          <br>Bootstrap
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.figma.com/">
+          <img src="https://skillicons.dev/icons?i=figma" width="48" height="48" alt="Figma" />
+          <br>Figma
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.adobe.com/products/photoshop.html">
+          <img src="https://skillicons.dev/icons?i=ps" width="48" height="48" alt="Photoshop" />
+          <br>Photoshop
+        </a>
+    </td>
+  </tr>
+  <tr>
+    <!-- Backend & Tools -->
+    <td align="center" width="100">
+        <a href="https://nodejs.org/">
+          <img src="https://skillicons.dev/icons?i=nodejs" width="48" height="48" alt="Node.js" />
+          <br>Node.js
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://expressjs.com/">
+          <img src="https://skillicons.dev/icons?i=express" width="48" height="48" alt="Express.js" />
+          <br>Express.js
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://git-scm.com/">
+          <img src="https://skillicons.dev/icons?i=git" width="48" height="48" alt="Git" />
+          <br>Git
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://github.com/">
+          <img src="https://skillicons.dev/icons?i=github" width="48" height="48" alt="GitHub" />
+          <br>GitHub
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://code.visualstudio.com/">
+          <img src="https://skillicons.dev/icons?i=vscode" width="48" height="48" alt="VS Code" />
+          <br>VS Code
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.microsoft.com/windows">
+          <img src="https://skillicons.dev/icons?i=windows" width="48" height="48" alt="Windows" />
+          <br>Windows
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://www.linux.org/">
+          <img src="https://skillicons.dev/icons?i=linux" width="48" height="48" alt="Linux" />
+          <br>Linux
+        </a>
+    </td>
+  </tr>
+  <tr>
+    <!-- Cloud & Deployment -->
+    <td align="center" width="100">
+        <a href="https://www.netlify.com/">
+          <img src="https://skillicons.dev/icons?i=netlify" width="48" height="48" alt="Netlify" />
+          <br>Netlify
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://vercel.com/">
+          <img src="https://skillicons.dev/icons?i=vercel" width="48" height="48" alt="Vercel" />
+          <br>Vercel
+        </a>
+    </td>
+    <td align="center" width="100">
+        <a href="https://cloud.google.com/">
+          <img src="https://skillicons.dev/icons?i=gcp" width="48" height="48" alt="Google Cloud" />
+          <br>Google Cloud
+        </a>
+    </td>
+  </tr>
+</table>
+</div>
