@@ -1,52 +1,3 @@
-[//]: # "Header Section"
-<h1 align="center"><samp>Turning Ideas Into Reality</samp> <img src="https://github.com/mupezzuol/mupezzuol/blob/master/assets/earth.gif" width="22px" height="22px"></h1>
-
-<h2 align="center"><samp>Hi 👋 I'm Ayushman Mohapatra</samp></h2>
-
-<h3 align="center"><samp>A Full Stack Web Developer from India</samp></h3>
-
-<img align="center" alt="Coding" width="1000" src="https://raw.githubusercontent.com/sugith10/images/main/gif/mario-working.gif">
-
-<div style="margin-bottom: 20px;"></div>
-
-[//]: # "About Section"
-<samp>- 🌐 Check out my portfolio at https://ayushmanmohapatra.netlify.app/</samp>
-
-<samp>- 📫 Contact me at ayushmanmohapatra895@email.com</samp>
-
-<samp>- 💻 Full Stack Developer passionate about creating efficient and user-friendly applications</samp>
-
-<samp>- ⚡ Fun fact: I love problem-solving and am always ready to adapt to new technologies!</samp>
-
-[//]: # "Connect Section"
-<h3 align="center"><samp>Connect</samp></h3>
-
-<div style="display: flex; align-items: flex-start; align: center">
-  <table align="center">
-    <tr>
-      <td align="center" width="100">
-        <a href="https://www.linkedin.com/in/ayushman-mohapatra/">
-          <img src="https://skillicons.dev/icons?i=linkedin" alt="icon" width="45" height="45" />
-          <br>LinkedIn
-        </a>
-      </td>
-      <td align="center" width="100">
-        <a href="https://github.com/ayushmaninbox">
-          <img src="https://skillicons.dev/icons?i=github" width="45" height="45" alt="GitHub" />
-          <br>GitHub
-        </a>
-      </td>
-      <td align="center" width="100">
-        <a href="https://www.instagram.com/theayushmanguy/">
-          <img src="https://skillicons.dev/icons?i=instagram" alt="icon" width="45" height="45" />
-          <br>Instagram
-        </a>
-      </td>
-    </tr>
-  </table>
-</div>
-
-[//]: # "Skills Section"
 <h3 align="center"><samp>💻 Languages and Tools</samp></h3>
 
 <div style="display: flex; align-items: flex-start; align: center">
@@ -233,17 +184,4 @@
       </td>
     </tr>
   </table>
-</div>
-
-[//]: # "Contributions Section"
-<h3 align="center"><samp>🐍 My Contributions</samp></h3>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ayushmaninbox/ayushmaninbox/output/github-contribution-grid-snake-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/ayushmaninbox/ayushmaninbox/output/github-contribution-grid-snake.svg">
-  <img alt="github contribution grid snake animation" src="https://raw.githubusercontent.com/ayushmaninbox/ayushmaninbox/output/github-contribution-grid-snake.svg">
-</picture>
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/ayushmaninbox/ayushmaninbox/output/ocean.gif" alt="snake eating contribution" />
 </div>
