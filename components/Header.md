@@ -1,4 +1,4 @@
-<h1 align="center"><samp>Turning Ideas Into Reality</samp> <img src="https://github.com/mupezzuol/mupezzuol/blob/master/assets/mario_hello_big.gif" width="22px" height="22px"></h1>
+<h1 align="center"><samp>Turning Ideas Into Reality</samp> <img src="https://github.com/mupezzuol/mupezzuol/blob/master/assets/earth.gif" width="22px" height="22px"></h1>
 
 <h2 align="center"><samp>Hi 👋 I'm Ayushman Mohapatra</samp></h2>
 
