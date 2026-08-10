@@ -22,7 +22,8 @@ if not USER_NAME:
     raise SystemExit('Set USER_NAME to your GitHub login')
 BIRTHDAY = datetime.datetime(2005, 9, 8)
 QUERY_COUNT = {'user_getter': 0, 'follower_getter': 0, 'graph_repos_stars': 0,
-               'recursive_loc': 0, 'graph_commits': 0, 'loc_query': 0}
+               'recursive_loc': 0, 'graph_commits': 0, 'loc_query': 0,
+               'repos_contributed_to': 0}
 
 
 def daily_readme(birthday):
@@ -76,9 +77,11 @@ def graph_commits(start_date, end_date):
     return int(request.json()['data']['user']['contributionsCollection']['contributionCalendar']['totalContributions'])
 
 
-def graph_repos_stars(count_type, owner_affiliation, cursor=None):
+def graph_repos_stars(count_type, owner_affiliation, cursor=None, total_stars=0):
     """
     Uses GitHub's GraphQL v4 API to return my total repository or star count.
+    Stars are paginated, because the star total is summed from the repository nodes
+    themselves and a single page only carries the first 100 of them.
     """
     query_count('graph_repos_stars')
     query = '''
@@ -105,11 +108,39 @@ def graph_repos_stars(count_type, owner_affiliation, cursor=None):
     }'''
     variables = {'owner_affiliation': owner_affiliation, 'login': USER_NAME, 'cursor': cursor}
     request = simple_request(graph_repos_stars.__name__, query, variables)
-    if request.status_code == 200:
-        if count_type == 'repos':
-            return request.json()['data']['user']['repositories']['totalCount']
-        elif count_type == 'stars':
-            return stars_counter(request.json()['data']['user']['repositories']['edges'])
+    page = request.json()['data']['user']['repositories']
+    if count_type == 'repos':
+        return page['totalCount']
+    total_stars += stars_counter(page['edges'])
+    if page['pageInfo']['hasNextPage']:
+        return graph_repos_stars(count_type, owner_affiliation, page['pageInfo']['endCursor'], total_stars)
+    return total_stars
+
+
+def repos_contributed_to():
+    """
+    Uses GitHub's GraphQL v4 API to return the number of repositories I have actually
+    contributed to -- commits, pull requests, reviews, or having created the repo.
+
+    This is deliberately not a count of repositories I merely have access to. Being
+    added to an organisation grants affiliation with every repository it owns, so an
+    affiliation count says how many repos I *could* push to, not how many I worked on.
+    """
+    query_count('repos_contributed_to')
+    query = '''
+    query($login: String!) {
+        user(login: $login) {
+            repositoriesContributedTo(
+                first: 1,
+                includeUserRepositories: true,
+                contributionTypes: [COMMIT, PULL_REQUEST, REPOSITORY, PULL_REQUEST_REVIEW]
+            ) {
+                totalCount
+            }
+        }
+    }'''
+    request = simple_request(repos_contributed_to.__name__, query, {'login': USER_NAME})
+    return int(request.json()['data']['user']['repositoriesContributedTo']['totalCount'])
 
 
 def recursive_loc(owner, repo_name, data, cache_comment, addition_total=0, deletion_total=0, my_commits=0, cursor=None):
@@ -180,13 +211,17 @@ def loc_counter_one_repo(owner, repo_name, data, cache_comment, history, additio
         return recursive_loc(owner, repo_name, data, cache_comment, addition_total, deletion_total, my_commits, history['pageInfo']['endCursor'])
 
 
-def loc_query(owner_affiliation, comment_size=0, force_cache=False, cursor=None, edges=[]):
+def loc_query(owner_affiliation, cursor=None, edges=None):
     """
     Uses GitHub's GraphQL v4 API to query all the repositories I have access to (with respect to owner_affiliation)
     Queries 60 repos at a time, because larger queries give a 502 timeout error and smaller queries send too many
     requests and also give a 502 error.
-    Returns the total number of lines of code in all repositories
+    Returns the list of repository edges the token can actually see.
+
+    The default branch head OID comes back with each repo so that repositories holding
+    the same history under two names can be collapsed later -- see dedupe_edges().
     """
+    edges = [] if edges is None else edges
     query_count('loc_query')
     query = '''
     query ($owner_affiliation: [RepositoryAffiliation], $login: String!, $cursor: String) {
@@ -196,9 +231,14 @@ def loc_query(owner_affiliation, comment_size=0, force_cache=False, cursor=None,
                 node {
                     ... on Repository {
                         nameWithOwner
+                        isFork
+                        parent {
+                            nameWithOwner
+                        }
                         defaultBranchRef {
                             target {
                                 ... on Commit {
+                                    oid
                                     history {
                                         totalCount
                                         }
@@ -218,17 +258,114 @@ def loc_query(owner_affiliation, comment_size=0, force_cache=False, cursor=None,
     variables = {'owner_affiliation': owner_affiliation, 'login': USER_NAME, 'cursor': cursor}
     request = simple_request(loc_query.__name__, query, variables)
     page = request.json()['data']['user']['repositories']
+    edges += visible_edges(page['edges'])
     if page['pageInfo']['hasNextPage']:                    # If repository data has another page
-        edges += visible_edges(page['edges'])              # Add on to the LoC count
-        return loc_query(owner_affiliation, comment_size, force_cache, page['pageInfo']['endCursor'], edges)
-    else:
-        return cache_builder(edges + visible_edges(page['edges']), comment_size, force_cache)
+        return loc_query(owner_affiliation, page['pageInfo']['endCursor'], edges)
+    return edges
 
 
-def cache_builder(edges, comment_size, force_cache, loc_add=0, loc_del=0):
+def head_oid(node):
+    """
+    Returns the commit at the tip of a repository's default branch, or None if the
+    repository is empty.
+    """
+    branch = node['defaultBranchRef']
+    return branch['target']['oid'] if branch else None
+
+
+def dedupe_edges(edges):
+    """
+    Collapses repositories that hold the same history under two different names.
+
+    A fork that is level with its parent, or a repo that was pushed to a second remote,
+    reports an identical default branch head from both sides. Walking both would count
+    every one of those commits -- and every line they touched -- twice, so only one copy
+    of each history is kept. The source repository wins over a fork of it, and ties fall
+    back to the name that sorts first, so the choice does not flip between runs.
+
+    Returns the surviving edges and a note for every history that was collapsed.
+    """
+    keep, notes = {}, []
+    for edge in edges:
+        node = edge['node']
+        # an empty repo has no head to collide on, so key it by name and keep it as-is
+        key = head_oid(node) or ('empty', node['nameWithOwner'])
+        rival = keep.get(key)
+        if rival is None:
+            keep[key] = edge
+            continue
+        loser, winner = (rival, edge) if outranks(node, rival['node']) else (edge, rival)
+        keep[key] = winner
+        notes.append('deduped: {} holds the same history as {}, counted once'.format(
+            loser['node']['nameWithOwner'], winner['node']['nameWithOwner']))
+    return list(keep.values()), notes
+
+
+def outranks(node, rival):
+    """
+    Decides which of two repositories sharing a history is the one worth keeping.
+    A source repository beats a fork of it; otherwise the earlier name wins.
+    """
+    if node['isFork'] != rival['isFork']:
+        return rival['isFork']
+    return node['nameWithOwner'] < rival['nameWithOwner']
+
+
+def warn_diverged_forks(edges):
+    """
+    Warns when a fork and its parent both survive deduplication.
+
+    Their heads differ, so they are genuinely separate tips, but everything before the
+    point they diverged is shared history that is now counted on both sides. There is no
+    way to net that out without walking every commit id, so it is reported instead of
+    silently folded into the totals.
+    """
+    names = {edge['node']['nameWithOwner'] for edge in edges}
+    return ['warning: {} has diverged from {}, so commits they still share are counted twice'.format(
+                edge['node']['nameWithOwner'], edge['node']['parent']['nameWithOwner'])
+            for edge in edges
+            if edge['node']['parent'] and edge['node']['parent']['nameWithOwner'] in names]
+
+
+def visibility_guard(repo_count):
+    """
+    Refuses to publish numbers built from fewer repositories than a previous run saw.
+
+    Every total on the card is only as complete as the token that gathered it. A token
+    without access to an organisation does not error -- those repositories are simply
+    absent from the response -- so the card would quietly redraw itself with a smaller,
+    wrong commit count. Comparing against the high water mark turns that silent
+    downgrade into a failed build. Set ALLOW_PARTIAL_DATA=1 to accept the lower number,
+    which is the right call when repositories were genuinely deleted.
+    """
+    filename = 'cache/repo_baseline.txt'
+    try:
+        with open(filename, 'r') as f:
+            baseline = int(f.read().split()[0])
+    except (FileNotFoundError, IndexError, ValueError):
+        baseline = 0
+    if repo_count < baseline and not os.environ.get('ALLOW_PARTIAL_DATA'):
+        raise SystemExit(
+            f'\nThis run can see {repo_count} repositories, but an earlier run saw {baseline}.\n'
+            f'The token is missing access to {baseline - repo_count} of them, so every total below\n'
+            'would be undercounted. Give ACCESS_TOKEN access to the missing repositories, or set\n'
+            'ALLOW_PARTIAL_DATA=1 if they were deleted on purpose.')
+    if repo_count > baseline:
+        with open(filename, 'w') as f:
+            f.write(f'{repo_count}\n')
+
+
+def cache_builder(edges, comment_size, force_cache=False, loc_add=0, loc_del=0):
     """
     Checks each repository in edges to see if it has been updated since the last time it was cached
     If it has, run recursive_loc on that repository to update the LOC count
+
+    Cached rows are looked up by repository hash rather than by position, so a repository
+    appearing, disappearing or simply coming back in a different order from the API can
+    no longer shift every later row onto the wrong repository's numbers. Rows are then
+    rewritten in the order the API returned, and any row whose repository is gone -- a
+    duplicate history that was deduped away, or a repo that was deleted -- is dropped
+    instead of being left behind to inflate the totals.
     """
     cached = True  # Assume all repositories are cached
     filename = 'cache/' + hashlib.sha256(USER_NAME.encode('utf-8')).hexdigest() + '.txt'  # Create a unique filename for each user
@@ -243,48 +380,34 @@ def cache_builder(edges, comment_size, force_cache, loc_add=0, loc_del=0):
         with open(filename, 'w') as f:
             f.writelines(data)
 
-    if len(data) - comment_size != len(edges) or force_cache:  # If the number of repos has changed, or force_cache is True
-        cached = False
-        flush_cache(edges, filename, comment_size)
-        with open(filename, 'r') as f:
-            data = f.readlines()
-
     cache_comment = data[:comment_size]  # save the comment block
-    data = data[comment_size:]  # remove those lines
-    for index in range(len(edges)):
-        repo_hash, commit_count, *__ = data[index].split()
-        if repo_hash == hashlib.sha256(edges[index]['node']['nameWithOwner'].encode('utf-8')).hexdigest():
-            try:
-                if int(commit_count) != edges[index]['node']['defaultBranchRef']['target']['history']['totalCount']:
-                    # if commit count has changed, update loc for that repo
-                    owner, repo_name = edges[index]['node']['nameWithOwner'].split('/')
-                    loc = recursive_loc(owner, repo_name, data, cache_comment)
-                    data[index] = repo_hash + ' ' + str(edges[index]['node']['defaultBranchRef']['target']['history']['totalCount']) + ' ' + str(loc[2]) + ' ' + str(loc[0]) + ' ' + str(loc[1]) + '\n'
-            except TypeError:  # If the repo is empty
-                data[index] = repo_hash + ' 0 0 0 0\n'
+    cached_rows = {line.split()[0]: line for line in data[comment_size:] if line.split()}
+
+    rows = []
+    for edge in edges:
+        node = edge['node']
+        repo_hash = hashlib.sha256(node['nameWithOwner'].encode('utf-8')).hexdigest()
+        if node['defaultBranchRef'] is None:  # If the repo is empty
+            rows.append(repo_hash + ' 0 0 0 0\n')
+            continue
+        commit_count = node['defaultBranchRef']['target']['history']['totalCount']
+        row = cached_rows.get(repo_hash)
+        if row is not None and not force_cache and int(row.split()[1]) == commit_count:
+            rows.append(row)  # commit count is unchanged, so the cached LOC still holds
+            continue
+        cached = False
+        owner, repo_name = node['nameWithOwner'].split('/')
+        loc = recursive_loc(owner, repo_name, rows, cache_comment)
+        rows.append(f'{repo_hash} {commit_count} {loc[2]} {loc[0]} {loc[1]}\n')
+
     with open(filename, 'w') as f:
         f.writelines(cache_comment)
-        f.writelines(data)
-    for line in data:
+        f.writelines(rows)
+    for line in rows:
         loc = line.split()
         loc_add += int(loc[3])
         loc_del += int(loc[4])
     return [loc_add, loc_del, loc_add - loc_del, cached]
-
-
-def flush_cache(edges, filename, comment_size):
-    """
-    Wipes the cache file
-    This is called when the number of repositories changes or when the file is first created
-    """
-    with open(filename, 'r') as f:
-        data = []
-        if comment_size > 0:
-            data = f.readlines()[:comment_size]  # only save the comment
-    with open(filename, 'w') as f:
-        f.writelines(data)
-        for node in edges:
-            f.write(hashlib.sha256(node['node']['nameWithOwner'].encode('utf-8')).hexdigest() + ' 0 0 0 0\n')
 
 
 def force_close_file(data, cache_comment):
@@ -447,12 +570,17 @@ if __name__ == '__main__':
     formatter('account data', user_time)
     age_data, age_time = perf_counter(daily_readme, BIRTHDAY)
     formatter('age calculation', age_time)
-    total_loc, loc_time = perf_counter(loc_query, ['OWNER', 'COLLABORATOR', 'ORGANIZATION_MEMBER'], 7)
+    edges, edge_time = perf_counter(loc_query, ['OWNER', 'COLLABORATOR', 'ORGANIZATION_MEMBER'])
+    formatter('repository list', edge_time)
+    visibility_guard(len(edges))
+    edges, notes = dedupe_edges(edges)
+    notes += warn_diverged_forks(edges)
+    total_loc, loc_time = perf_counter(cache_builder, edges, 7)
     formatter('LOC (cached)', loc_time) if total_loc[-1] else formatter('LOC (no cache)', loc_time)
     commit_data, commit_time = perf_counter(commit_counter, 7)
     star_data, star_time = perf_counter(graph_repos_stars, 'stars', ['OWNER'])
     repo_data, repo_time = perf_counter(graph_repos_stars, 'repos', ['OWNER'])
-    contrib_data, contrib_time = perf_counter(graph_repos_stars, 'repos', ['OWNER', 'COLLABORATOR', 'ORGANIZATION_MEMBER'])
+    contrib_data, contrib_time = perf_counter(repos_contributed_to)
     follower_data, follower_time = perf_counter(follower_getter, USER_NAME)
 
     for index in range(len(total_loc) - 1):
@@ -462,7 +590,10 @@ if __name__ == '__main__':
     svg_overwrite('light_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1])
 
     print('\033[F\033[F\033[F\033[F\033[F\033[F\033[F\033[F',
-          '{:<21}'.format('Total function time:'), '{:>11}'.format('%.4f' % (user_time + age_time + loc_time + commit_time + star_time + repo_time + contrib_time)),
+          '{:<21}'.format('Total function time:'), '{:>11}'.format('%.4f' % (user_time + age_time + edge_time + loc_time + commit_time + star_time + repo_time + contrib_time)),
           ' s \033[E\033[E\033[E\033[E\033[E\033[E\033[E\033[E', sep='')
 
     print('Total GitHub GraphQL API calls:', '{:>3}'.format(sum(QUERY_COUNT.values())))
+    print('Repositories:', '{:>19}'.format(f'{len(edges)} counted'))
+    for note in notes:
+        print('  ', note)
