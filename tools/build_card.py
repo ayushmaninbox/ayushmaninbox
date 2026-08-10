@@ -13,27 +13,17 @@ from PIL import Image
 import numpy as np
 from dateutil import relativedelta
 
-SRC = 'components/portrait-source.png'   # gitignored; local only
+SRC = 'giphy.gif'
 
-# The source is RGBA and never fully opaque (peak alpha 215, 68% of pixels partial).
-# It is embedded as a lossless PNG with that alpha intact and NO background behind it,
-# so the card colour shows through the soft edge instead of a flattened black box.
-# The only per-file operation is inverting RGB; alpha is carried through untouched.
 IMG_X, IMG_Y, IMG_H = 15, 28, 474    # width is derived from the source aspect (never crops)
-IMG_SCALE = 2                        # 2x for retina; 3x tripled the bytes for no visible gain
+IMG_SCALE = 1
 IMG_GAP = 22                         # gutter between portrait and info column
-GREY_TOL = 8                         # max RGB spread before we stop treating it as greyscale
 
 INFO_W, INFO_FS, LH = 64, 16, 20     # info column: chars per line, font size, line height
-# The stat rows can't always justify down to INFO_W: once a value hits 9 digits the dot
-# leaders are already empty, so the line grows instead. Real numbers put the LOC row at
-# 66, hence the slack -- 3 chars keeps it inside the card as those figures climb.
 INFO_SLACK = 3
 ADV = 0.5995                         # ConsolasFallback advance, in em
 H = 530
 
-# the glow/shadow reads naturally over a dark card, so the untouched image goes there;
-# light mode gets the inversion
 THEMES = {
     'dark_mode.svg':  dict(invert=False, bg='#161b22', fg='#c9d1d9', key='#ffa657',
                            val='#a5d6ff', add='#3fb950', dele='#f85149', cc='#616e7f'),
@@ -50,35 +40,10 @@ def panel_width():
 
 
 def portrait_data_uri(theme):
-    """Scale the portrait and, for one file, invert the colour. Alpha always survives.
-
-    Encoded lossless -- JPEG has no alpha channel, so it has to be flattened onto some
-    colour first, and that flattening is what smeared the soft edge before.
-
-    This source is neutral (mean RGB spread 1.2/255), so it is stored as luminance +
-    alpha rather than RGBA: same pixels to the eye, half the bytes. A genuinely
-    coloured source falls back to RGBA automatically.
-    """
-    im = Image.open(SRC).convert('RGBA').resize(
-        (panel_width() * IMG_SCALE, IMG_H * IMG_SCALE), Image.LANCZOS)
-    a = np.asarray(im).astype(np.int16)
-    greyscale = int((a[..., :3].max(2) - a[..., :3].min(2)).mean()) <= GREY_TOL
-
-    if greyscale:
-        lum = a[..., :3].mean(2)
-        if theme['invert']:
-            lum = 255 - lum
-        out = np.dstack([lum, a[..., 3]]).clip(0, 255).astype(np.uint8)
-        img = Image.fromarray(out).convert('LA')
-    else:
-        if theme['invert']:
-            a[..., :3] = 255 - a[..., :3]    # alpha channel deliberately untouched
-        img = Image.fromarray(a.clip(0, 255).astype(np.uint8)).convert('RGBA')
-
-    buf = io.BytesIO()
-    img.save(buf, format='PNG', optimize=True)
-    raw = buf.getvalue()
-    return 'data:image/png;base64,' + base64.b64encode(raw).decode('ascii'), len(raw)
+    """Embed the animated GIF directly as base64."""
+    with open(SRC, 'rb') as f:
+        raw = f.read()
+    return 'data:image/gif;base64,' + base64.b64encode(raw).decode('ascii'), len(raw)
 
 
 # ---------------------------------------------------------------- info rows
