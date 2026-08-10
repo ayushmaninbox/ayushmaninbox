@@ -1,0 +1,6 @@
+# source photo for the ASCII portrait -- kept local, the art is baked into the SVGs
+components/
+__pycache__/
+.DS_Store
+PREVIEW.png
+*_render.png
