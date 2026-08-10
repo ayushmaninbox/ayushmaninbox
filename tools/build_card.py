@@ -98,10 +98,10 @@ ROWS_DATA = [
     (None, None, None),
     ('Languages.Programming', 'Python, Java, JavaScript, C, C++, R',        None),
     ('Languages.Computer',    'HTML, CSS, TypeScript, JSON, YAML',          None),
-    ('Languages.Real',        'English, Hindi, Odia',                       None),
+    ('Languages.Real',        'English, Hindi',                       None),
     (None, None, None),
     ('Hobbies.Software',      'Logic Pro, FL Studio, one genre per week',   None),
-    ('Hobbies.Hardware',      'Bricking Arch, then unbricking Arch',        None),
+    ('Hobbies.Hardware',      'Bricking, and then unbricking my pc',        None),
 ]
 CONTACT = [
     ('Email',     'ayushmanmohapatra895@gmail.com'),
