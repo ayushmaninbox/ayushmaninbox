@@ -2,9 +2,13 @@ import datetime
 from dateutil import relativedelta
 import requests
 import os
+import sys
 from lxml import etree
 import time
 import hashlib
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools'))
+import build_contrib
 
 # Prefers a personal access token, falls back to the workflow's built-in GITHUB_TOKEN
 # so a fresh clone runs with no secrets configured at all. The difference is coverage:
@@ -23,7 +27,7 @@ if not USER_NAME:
 BIRTHDAY = datetime.datetime(2005, 9, 8)
 QUERY_COUNT = {'user_getter': 0, 'follower_getter': 0, 'graph_repos_stars': 0,
                'recursive_loc': 0, 'graph_commits': 0, 'loc_query': 0,
-               'repos_contributed_to': 0}
+               'repos_contributed_to': 0, 'contribution_calendar': 0}
 
 
 def daily_readme(birthday):
@@ -115,6 +119,33 @@ def graph_repos_stars(count_type, owner_affiliation, cursor=None, total_stars=0)
     if page['pageInfo']['hasNextPage']:
         return graph_repos_stars(count_type, owner_affiliation, page['pageInfo']['endCursor'], total_stars)
     return total_stars
+
+
+def contribution_calendar():
+    """
+    Uses GitHub's GraphQL v4 API to return the last year of daily contribution counts,
+    in the same week/weekday shape as GitHub's own contribution graph.
+    """
+    query_count('contribution_calendar')
+    query = '''
+    query($login: String!) {
+        user(login: $login) {
+            contributionsCollection {
+                contributionCalendar {
+                    weeks {
+                        contributionDays {
+                            date
+                            contributionCount
+                            weekday
+                        }
+                    }
+                }
+            }
+        }
+    }'''
+    request = simple_request(contribution_calendar.__name__, query, {'login': USER_NAME})
+    calendar = request.json()['data']['user']['contributionsCollection']['contributionCalendar']
+    return calendar['weeks']
 
 
 def repos_contributed_to():
@@ -441,7 +472,8 @@ def stars_counter(data):
     return total_stars
 
 
-def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, contrib_data, follower_data, loc_data):
+def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, contrib_data, follower_data, loc_data,
+                   weeks):
     """
     Parse SVG files and update elements with my age, commits, stars, repositories, and lines written
     """
@@ -456,7 +488,25 @@ def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, contrib
     justify_format(root, 'loc_data', loc_data[2], 11)
     justify_format(root, 'loc_add', loc_data[0])
     justify_format(root, 'loc_del', loc_data[1], 7)
+    widget_overwrite(root, filename, weeks)
     tree.write(filename, encoding='utf-8', xml_declaration=True)
+
+
+def widget_overwrite(root, filename, weeks):
+    """
+    Rebuilds the activity widget (isometric contribution chart + streak stats) from
+    scratch each run -- unlike the text fields above, its geometry depends on live
+    data, so it can't be patched in place the same way.
+    """
+    target = root.find(".//*[@id='activity_widget']")
+    if target is None:
+        return
+    for child in list(target):
+        target.remove(child)
+    card_width = float(root.get('width').replace('px', ''))
+    theme = build_contrib.WIDGET_THEMES[filename]
+    fragment = build_contrib.render_widget(theme, card_width, weeks)
+    target.append(etree.fromstring(fragment))
 
 
 def justify_format(root, element_id, new_text, length=0):
@@ -582,12 +632,13 @@ if __name__ == '__main__':
     repo_data, repo_time = perf_counter(graph_repos_stars, 'repos', ['OWNER'])
     contrib_data, contrib_time = perf_counter(repos_contributed_to)
     follower_data, follower_time = perf_counter(follower_getter, USER_NAME)
+    weeks, weeks_time = perf_counter(contribution_calendar)
 
     for index in range(len(total_loc) - 1):
         total_loc[index] = '{:,}'.format(total_loc[index])  # format added, deleted, and total LOC
 
-    svg_overwrite('dark_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1])
-    svg_overwrite('light_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1])
+    svg_overwrite('dark_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1], weeks)
+    svg_overwrite('light_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1], weeks)
 
     print('\033[F\033[F\033[F\033[F\033[F\033[F\033[F\033[F',
           '{:<21}'.format('Total function time:'), '{:>11}'.format('%.4f' % (user_time + age_time + edge_time + loc_time + commit_time + star_time + repo_time + contrib_time)),

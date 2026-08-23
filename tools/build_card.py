@@ -13,6 +13,8 @@ from PIL import Image
 import numpy as np
 from dateutil import relativedelta
 
+import build_contrib
+
 SRC = 'giphy.gif'
 
 IMG_X, IMG_Y, IMG_H = 15, 28, 474    # width is derived from the source aspect (never crops)
@@ -22,7 +24,15 @@ IMG_GAP = 22                         # gutter between portrait and info column
 INFO_W, INFO_FS, LH = 64, 16, 20     # info column: chars per line, font size, line height
 INFO_SLACK = 3
 ADV = 0.5995                         # ConsolasFallback advance, in em
-H = 530
+CARD_H = 530                         # height of the neofetch card itself
+
+# Below the card sits the activity widget (isometric contribution chart + streak
+# stats), rendered fresh by today.py on every run. Its layout constants live in
+# build_contrib.py so both scripts size it identically -- this script only reserves
+# the canvas space, today.py fills it. H is set further down, once compute_card_width
+# is defined.
+WIDGET_GAP = 25                      # gap between the card and the widget
+WIDGET_BOTTOM_PAD = 20
 
 THEMES = {
     'dark_mode.svg':  dict(invert=False, bg='#161b22', fg='#c9d1d9', key='#ffa657',
@@ -37,6 +47,15 @@ def panel_width():
     """Panel width that matches the source aspect exactly, so nothing is ever cropped."""
     w, h = Image.open(SRC).size
     return int(round(IMG_H * w / h))
+
+
+def compute_card_width():
+    iw = panel_width()
+    info_x = IMG_X + iw + IMG_GAP
+    return int(round(info_x + (INFO_W + INFO_SLACK) * INFO_FS * ADV)) + 15
+
+
+H = CARD_H + WIDGET_GAP + build_contrib.panel_height(compute_card_width()) + WIDGET_BOTTOM_PAD
 
 
 def portrait_data_uri(theme):
@@ -100,7 +119,7 @@ def build(theme_file):
     uri, nbytes = portrait_data_uri(t)
     iw = panel_width()
     info_x = IMG_X + iw + IMG_GAP
-    W = int(round(info_x + (INFO_W + INFO_SLACK) * INFO_FS * ADV)) + 15
+    W = compute_card_width()
     out = [
         "<?xml version='1.0' encoding='UTF-8'?>",
         f'<svg xmlns="http://www.w3.org/2000/svg" font-family="ConsolasFallback,Consolas,monospace" '
@@ -161,7 +180,14 @@ def build(theme_file):
         f' ( <tspan class="addColor" id="loc_add">0</tspan><tspan class="addColor">++</tspan>, '
         f'<tspan id="loc_del_dots"> </tspan><tspan class="delColor" id="loc_del">0</tspan>'
         f'<tspan class="delColor">--</tspan> )')
-    out += ['</text>', '</svg>']
+    out.append('</text>')
+
+    # activity widget -- today.py replaces this group's children every run
+    divider_y = CARD_H + WIDGET_GAP / 2
+    out.append(f'<line x1="{IMG_X}" y1="{divider_y}" x2="{W-IMG_X}" y2="{divider_y}" stroke="{t["cc"]}" stroke-width="1" opacity="0.4"/>')
+    out.append(f'<g id="activity_widget" transform="translate({build_contrib.MARGIN},{CARD_H+WIDGET_GAP})"></g>')
+
+    out.append('</svg>')
     return '\n'.join(out) + '\n'
 
 

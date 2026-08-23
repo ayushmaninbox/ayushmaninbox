@@ -4,7 +4,11 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 4 * * *"
+    # Commits to this repo update the cards instantly via the push trigger above.
+    # Commits elsewhere (other repos, contributions counted toward the profile
+    # totals) only surface here on the next run, so this polls hourly to keep
+    # the gap as close to real time as an Actions schedule allows.
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
