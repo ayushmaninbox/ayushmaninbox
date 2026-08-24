@@ -44,6 +44,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USER_NAME: ${{ secrets.USER_NAME || github.repository_owner }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          # Newly rotated ACCESS_TOKEN is pending org approval for a few repos in
+          # masai-course/forke-org/forke-sandbox -- remove once that's granted.
+          ALLOW_PARTIAL_DATA: "1"
         run: python today.py
       - name: Commit and push changes
         env:
