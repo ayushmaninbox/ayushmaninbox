@@ -3,23 +3,16 @@ on:
   push:
     branches:
       - main
-  repository_dispatch:
-    # Fired by the "notify-profile" workflow that other repos push on commit,
-    # so the cards update instantly instead of waiting on a schedule.
-    types: [contribution-push]
   schedule:
-    # Fallback only: catches contributions the push trigger can't reach
-    # (repos without the notifier, PRs/issues/reviews on repos we don't own)
-    # and keeps the birthday-based age string fresh even on quiet days.
-    - cron: "0 */6 * * *"
+    # Commits to this repo update the cards instantly via the push trigger above.
+    # Commits elsewhere (other repos, contributions counted toward the profile
+    # totals) only surface here on the next run, so this polls hourly to keep
+    # the gap as close to real time as an Actions schedule allows.
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
-
-concurrency:
-  group: readme-build
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -58,5 +51,5 @@ jobs:
           git config --global user.email "ayushmanmohapatra895@gmail.com"
           git config --global user.name "Ayushman Mohapatra"
           git add -A
-          git diff --staged --quiet || (git commit -m "Update README stats [skip ci]" && git pull --rebase && git push)
+          git diff --staged --quiet || (git commit -m "Update README stats [skip ci]" && git push)
 

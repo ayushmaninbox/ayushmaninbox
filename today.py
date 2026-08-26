@@ -3,7 +3,6 @@ from dateutil import relativedelta
 import requests
 import os
 import sys
-import subprocess
 from lxml import etree
 import time
 import hashlib
@@ -493,16 +492,6 @@ def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, contrib
     tree.write(filename, encoding='utf-8', xml_declaration=True)
 
 
-def working_tree_dirty():
-    """
-    True if committing right now would actually produce a commit. Used to decide
-    whether to count today's not-yet-made commit in the contribution widget below --
-    the calendar is fetched before that commit exists, so without this the widget is
-    permanently one contribution behind on any run that changes something.
-    """
-    return subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--']).returncode != 0
-
-
 def widget_overwrite(root, filename, weeks):
     """
     Rebuilds the activity widget (isometric contribution chart + streak stats) from
@@ -650,14 +639,6 @@ if __name__ == '__main__':
 
     svg_overwrite('dark_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1], weeks)
     svg_overwrite('light_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1], weeks)
-
-    # The commit above hasn't happened yet when contribution_calendar() ran, so if this
-    # run is about to make one, it's a contribution the widget just rendered without --
-    # count it and re-render so the totals are accurate the moment the commit lands.
-    if working_tree_dirty():
-        weeks[-1]['contributionDays'][-1]['contributionCount'] += 1
-        svg_overwrite('dark_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1], weeks)
-        svg_overwrite('light_mode.svg', age_data, commit_data, star_data, repo_data, contrib_data, follower_data, total_loc[:-1], weeks)
 
     print('\033[F\033[F\033[F\033[F\033[F\033[F\033[F\033[F',
           '{:<21}'.format('Total function time:'), '{:>11}'.format('%.4f' % (user_time + age_time + edge_time + loc_time + commit_time + star_time + repo_time + contrib_time)),
