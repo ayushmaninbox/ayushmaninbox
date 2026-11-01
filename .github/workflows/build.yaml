@@ -4,11 +4,8 @@ on:
     branches:
       - main
   schedule:
-    # Commits to this repo update the cards instantly via the push trigger above.
-    # Commits elsewhere (other repos, contributions counted toward the profile
-    # totals) only surface here on the next run, so this polls hourly to keep
-    # the gap as close to real time as an Actions schedule allows.
-    - cron: "0 * * * *"
+    # Daily scheduled run at midnight IST (18:30 UTC) to update the age area and commit stats once per day
+    - cron: "30 18 * * *"
   workflow_dispatch:
 
 permissions:
